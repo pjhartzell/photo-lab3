@@ -18,7 +18,6 @@ import numpy as np
 class RelativeOrientation:
     # Some default values
     def __init__(self):
-        self.bx = 0
         self.by = 0
         self.bz = 0
         self.omega = 0
@@ -40,14 +39,36 @@ class RelativeOrientation:
         )
         self.left_coords = self.left_coords[left_indices,:]
         self.right_coords = self.right_coords[right_indices,:]
+
+    # Set bx baseline distance
+    def set_bx(self, bx):
+        self.bx = bx
     
+    # Set flying height (for LSQ iteration termination)
+    def set_agl(self, agl):
+        self.agl = agl
+
     # Least squares Relative Orientation
     def relative_orientation(self):
         # Check for minimum number of points
         if self.left_coords.shape[0] < 5:
             print('Minimum of 5 matching points is required.')
             return 0
-        
+        # Least squares angle correction threshold (1 mm on the ground)
+        angle_threshold = 0.001 / self.agl
+        # Least squares baseline component correction threshold (1 micrometer
+        # in image space)
+        baseline_threshold = 0.000001
+
+        # Iterate until corrections are less than thresholds
+        delta_hat = np.ones((5,1))
+        while (delta_hat[0:2,0] > baseline_threshold).any() or 
+                (delta_hat[2:,0] > angle_threshold).any():
+            # A matrix
+            for i in range(self.left_coords.shape[0])
+
+
+            # w matrix
 
 
 
@@ -57,4 +78,5 @@ my_ro.read_right('image_28_corrected.txt')
 my_ro.match_coords()
 print(my_ro.left_coords)
 print(my_ro.right_coords)
+my_ro.set_bx(92)
 my_ro.relative_orientation()
