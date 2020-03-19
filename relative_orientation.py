@@ -67,15 +67,26 @@ class RelativeOrientation:
         # 1 micrometer in image space
         baseline_threshold = 0.000001
 
-        # Iterate until corrections are less than thresholds
+        # Prep some variables
         delta_hat = np.ones((5,1))
+        x_hat = np.array([[self.by],
+                          [self.bz],
+                          [self.omega],
+                          [self.phi],
+                          [self.kappa]])
+        # Iterate until delta_hat corrections are less than thresholds
         while (delta_hat[0:2,0] > baseline_threshold).any() or 
                 (delta_hat[2:,0] > angle_threshold).any():
 
             # Form A and w matrices with current parameter estimates
-            A, w = A_and_w(self.omega, self.phi, self.kappa, 
-                           self.bx, self.by, self.bz
-                           self.left, self.right, self.c)
+            A, w = A_and_w(x_hat, self.bx, self.left, self.right, self.c)
+            # Least squares solution
+            delta_hat = -np.linalg.inv(A.T.dot(A)).dot(A.T).dot(w)
+            print("delta_hat = {}".format(delta_hat)
+            # Update current cumulative solution estimate
+            x_hat += delta_hat
+            print("x_hat = {}".format(x_hat))
+
 
 
 
