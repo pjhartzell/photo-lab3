@@ -1,4 +1,4 @@
-import numpy as numpy
+import numpy as np
 
 def R1(omega):
     sin_omega = np.sin(omega)

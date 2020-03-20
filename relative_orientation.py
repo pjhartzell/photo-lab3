@@ -1,14 +1,3 @@
-# left and right image coordinate pairs (5 pair minimum)
-# bx value
-# initial values for 5 unknowns
-
-# set large delcap values
-# while delcap values > threshold
-#   compute misclosure with current estimates
-#   compute design matrix with current estimates
-#   least squares for delcap vector
-#   update vector of unknowns with latest delcap
-
 # report number of iterations
 # report solved values of unknowns
 # report correlation matrixx
@@ -19,11 +8,14 @@ from lsq_matrices import A_and_w
 class RelativeOrientation:
     # Some default values
     def __init__(self):
-        self.by = 0
-        self.bz = 0
-        self.omega = 0
-        self.phi = 0
-        self.kappa = 0
+        self.bx = 0.0
+        self.by = 0.0
+        self.bz = 0.0
+        self.omega = 0.0
+        self.phi = 0.0
+        self.kappa = 0.0
+        self.c = 0.0
+        self.agl = 0.0
 
     # Read image coords; order = point#, x, y
     def read_left(self, left_file):
@@ -41,18 +33,6 @@ class RelativeOrientation:
         self.left = self.left[left_indices,:]
         self.right = self.right[right_indices,:]
 
-    # Set bx baseline distance
-    def set_bx(self, bx):
-        self.bx = bx
-    
-    # Set flying height (for LSQ iteration termination)
-    def set_agl(self, agl):
-        self.agl = agl
-
-    # Set camera constant (~f)
-    def set_c(self, c):
-        self.c = c
-
     # Least squares Relative Orientation
     def relative_orientation(self):
         # Check for minimum number of points
@@ -60,12 +40,12 @@ class RelativeOrientation:
             print('Minimum of 5 matching points is required.')
             return 0
 
-        # Least squares angle correction threshold in radians
+        # Least squares angle correction threshold (radians)
         # Equivalent to 1 mm on the ground
         angle_threshold = 0.001 / self.agl
-        # Least squares baseline component correction threshold in meters
-        # 1 micrometer in image space
-        baseline_threshold = 0.000001
+        # Least squares baseline component correction threshold (mm)
+        # 1 micrometer in image space, which is well below comparator precision
+        baseline_threshold = 0.001
 
         # Prep some variables
         delta_hat = np.ones((5,1))
@@ -75,27 +55,29 @@ class RelativeOrientation:
                           [self.phi],
                           [self.kappa]])
         # Iterate until delta_hat corrections are less than thresholds
-        while (delta_hat[0:2,0] > baseline_threshold).any() or 
-                (delta_hat[2:,0] > angle_threshold).any():
-
+        iter_count = 0
+        while (((delta_hat[0:2,0] > baseline_threshold).any() or 
+                (delta_hat[2:,0] > angle_threshold).any()) and
+                 iter_count < 20):
+            input()
             # Form A and w matrices with current parameter estimates
-            A, w = A_and_w(x_hat, self.bx, self.left, self.right, self.c)
+            A, w = A_and_w(x_hat, self.left, self.right, self.bx, self.c)
+            print(w)
             # Least squares solution
             delta_hat = -np.linalg.inv(A.T.dot(A)).dot(A.T).dot(w)
-            print("delta_hat = {}".format(delta_hat)
+            print("delta_hat = {}".format(delta_hat))
             # Update current cumulative solution estimate
             x_hat += delta_hat
-            print("x_hat = {}".format(x_hat))
-
-
-
+            # print("x_hat = {}".format(x_hat))
+            iter_count += 1
+            # print(iter_count)
 
 
 my_ro = RelativeOrientation()
 my_ro.read_left('image_27_corrected.txt')
 my_ro.read_right('image_28_corrected.txt')
 my_ro.match_coords()
-print(my_ro.left)
-print(my_ro.right)
-my_ro.set_bx(92)
+my_ro.bx = 92
+my_ro.c = 153.358
+my_ro.agl = 1860 - 1100
 my_ro.relative_orientation()
