@@ -25,8 +25,8 @@ my_ro.report_model()
 # Print the y-parallax
 my_ro.report_parallax()
 
-# Plot scale factors from model space computations
-# my_ro.report_scale_factors()
+# Plot scale factors from model space coordinate computations
+my_ro.plot_scale_factors()
 
-# Print correlation matrix from the least squares adjustment
-# my_ro.report_correlation()
+# Print correlation matrix from the least squares desing matrix
+my_ro.report_correlation()

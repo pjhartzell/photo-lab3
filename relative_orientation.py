@@ -79,6 +79,8 @@ class RelativeOrientation:
         self.omega = x_hat[2,0]
         self.phi = x_hat[3,0]
         self.kappa = x_hat[4,0]
+        # Compute correlation matrix
+        self.correlation = self.compute_correlation(A)
 
     # Design (A) and misclosure (w) matrices
     def A_and_w(self, x_hat, left, right, bx, c):
@@ -136,6 +138,15 @@ class RelativeOrientation:
             A_mat[i,:] = [dby, dbz, domega, dphi, dkappa]
             w_vec[i,0] = misclosure
         return A_mat, w_vec
+
+    # Correlation matrix
+    def compute_correlation(self, A):
+        ATA = A.T.dot(A)
+        corr = np.zeros(ATA.shape)
+        for i in range(ATA.shape[0]):
+            for j in range(ATA.shape[1]):
+                corr[i,j] = ATA[i,j] / np.sqrt(ATA[i,i]*ATA[j,j])
+        return corr
 
     # Print solved RO parameters
     def report_ro(self):
@@ -220,3 +231,20 @@ class RelativeOrientation:
         headers = ['#', 'Parallax']
         print(tabulate(parallax, headers, tablefmt='simple',
             floatfmt=('.0f', '.3f')))
+    
+    # Plot scale factors
+    def plot_scale_factors(self):
+        point_nums = self.left[:,0]
+        plt.plot(point_nums, self.lambda_scale, label='Left Image Scale')
+        plt.plot(point_nums, self.mu_scale, label='Right Image Scale')
+        plt.xlabel('Point Number')
+        plt.ylabel('Scale')
+        plt.title('Left and Right Image Scale Factors')
+        plt.legend()
+        plt.show()
+    
+    def report_correlation(self):
+        print('\nCorrelation Coefficient Matrix')
+        headers = ['by', 'bz', 'omega', 'phi', 'kappa']
+        print(tabulate(self.correlation, headers, tablefmt='simple',
+            floatfmt=('.3f', '.3f', '.3f', '.3f', '.3f')))
