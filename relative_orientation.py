@@ -217,7 +217,7 @@ class RelativeOrientation:
     # Print model space coordinates
     def report_model(self):
         print('\nModel Space Coordinates')
-        headers = ['#', 'x', 'y', 'z']
+        headers = ['#', 'x (mm)', 'y (mm)', 'z (mm)']
         print(tabulate(self.model, headers, tablefmt='simple',
             floatfmt=('.0f', '.3f', '.3f', '.3f')))
 
@@ -228,21 +228,22 @@ class RelativeOrientation:
         point_nums = np.expand_dims(self.left[:,0], axis=1)
         parallax = np.hstack((point_nums, parallax))
         print('\nY Parallax')
-        headers = ['#', 'Parallax']
+        headers = ['#', 'Parallax (mm)']
         print(tabulate(parallax, headers, tablefmt='simple',
             floatfmt=('.0f', '.3f')))
     
     # Plot scale factors
     def plot_scale_factors(self):
         point_nums = self.left[:,0]
-        plt.plot(point_nums, self.lambda_scale, label='Left Image Scale')
-        plt.plot(point_nums, self.mu_scale, label='Right Image Scale')
+        plt.plot(point_nums, self.lambda_scale, label='Left Image (27)')
+        plt.plot(point_nums, self.mu_scale, label='Right Image (28)')
         plt.xlabel('Point Number')
         plt.ylabel('Scale')
         plt.title('Left and Right Image Scale Factors')
         plt.legend()
         plt.show()
     
+    # Print correlation matrix
     def report_correlation(self):
         print('\nCorrelation Coefficient Matrix')
         headers = ['by', 'bz', 'omega', 'phi', 'kappa']
