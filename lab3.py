@@ -5,8 +5,8 @@ from relative_orientation import RelativeOrientation
 my_ro = RelativeOrientation()
 
 # Read in image coordinates, make sure the point numbers match, visualize
-my_ro.read_left('image_27_given.txt')
-my_ro.read_right('image_28_given.txt')
+my_ro.read_left('./data/image_27_given.txt')
+my_ro.read_right('./data/image_28_given.txt')
 my_ro.match_coords()
 my_ro.plot_coords()
 
